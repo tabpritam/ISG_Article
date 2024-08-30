@@ -11,7 +11,7 @@ app.use(express.json());
 app.use(morgan("dev"));
 app.get("/", (req, res) => {
   res.json({
-    message: "Welcome to the API!",
+    message: "Welcome to the API! vercel deploy test",
     status: "success",
     data: null,
   });
