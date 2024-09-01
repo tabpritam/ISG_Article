@@ -17,10 +17,10 @@ var blogSchema = new mongoose.Schema(
   },
   {
     toJSON: {
-      virtuals: true,
+      virtuals: false,
     },
     toObject: {
-      virtuals: true,
+      virtuals: false,
     },
     timestamps: true,
   }
