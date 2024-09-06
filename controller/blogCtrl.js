@@ -2,17 +2,53 @@ const Blog = require("../models/blogModel");
 const asyncHandler = require("express-async-handler");
 const validateMongodbId = require("../utils/validateMongodbId");
 
-//create a blog
 const createBlog = asyncHandler(async (req, res) => {
   try {
-    const blog = await Blog.create(req.body);
+    const { title, content, author } = req.body;
+
+    let missingFields = [];
+    if (!title) missingFields.push("title");
+    if (!content) missingFields.push("content");
+    if (!author) missingFields.push("author");
+
+    if (missingFields.length > 0) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          message: `${missingFields.join(", ")} is required`,
+        },
+      });
+    }
+
+    // Create the blog
+    const blog = await Blog.create({ title, content, author });
     res.status(201).json({
-      success: "true",
-      data: { message: "Blog Create successfully" },
+      success: true,
+      data: {
+        message: "Blog created successfully",
+        blog,
+      },
     });
   } catch (error) {
-    res.status(400), json({ success: "false", data: { errMessage: error } });
-    throw new Error("Invalid data");
+    // Handle Mongoose validation errors
+    if (error.name === "ValidationError") {
+      const messages = Object.values(error.errors).map((err) => err.message);
+      return res.status(400).json({
+        success: false,
+        error: {
+          message: messages.join(", "),
+        },
+      });
+    }
+
+    // Handle other errors
+    console.error(error); // Log the error for internal review
+    res.status(500).json({
+      success: false,
+      error: {
+        message: "An internal server error occurred. Please try again later.",
+      },
+    });
   }
 });
 
