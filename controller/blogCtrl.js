@@ -5,6 +5,7 @@ const validateMongodbId = require("../utils/validateMongodbId");
 const createBlog = asyncHandler(async (req, res) => {
   try {
     const { title, content, author } = req.body;
+    const image = req.file ? req.file.path : null; // Cloudinary URL
 
     let missingFields = [];
     if (!title) missingFields.push("title");
@@ -21,7 +22,7 @@ const createBlog = asyncHandler(async (req, res) => {
     }
 
     // Create the blog
-    const blog = await Blog.create({ title, content, author });
+    const blog = await Blog.create({ title, content, author, image });
     res.status(201).json({
       success: true,
       data: {

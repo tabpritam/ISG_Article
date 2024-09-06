@@ -14,6 +14,9 @@ var blogSchema = new mongoose.Schema(
       type: String,
       required: [true, "Author is required"],
     },
+    image: {
+      type: String,
+    },
   },
   {
     toJSON: {
