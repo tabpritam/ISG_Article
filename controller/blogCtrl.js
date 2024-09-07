@@ -23,6 +23,7 @@ const createBlog = asyncHandler(async (req, res) => {
 
     // Create the blog
     const blog = await Blog.create({ title, content, author, image });
+
     res.status(201).json({
       success: true,
       data: {
