@@ -6,6 +6,8 @@ const cors = require("cors");
 const { notFound, errorHandler } = require("./middlewares/errorHandler");
 const morgan = require("morgan");
 const blogRouter = require("./routes/blogRoute");
+const authRouter = require("./routes/authRoute");
+
 dbConnect();
 app.use(cors());
 app.use(express.json());
@@ -19,6 +21,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/v1/blog", blogRouter);
+app.use("/api/v1/user", authRouter);
 
 app.use(notFound);
 app.use(errorHandler);
