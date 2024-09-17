@@ -5,7 +5,6 @@ const upload = require("../config/multerConfig");
 
 router.post("/", upload.single("image"), createBlog);
 router.get("/", getAllBlog);
-router.get("/getAll", getAllBlog);
 router.get("/:id", getBlog);
 
 module.exports = router;

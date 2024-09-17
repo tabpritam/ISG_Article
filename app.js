@@ -9,7 +9,15 @@ const blogRouter = require("./routes/blogRoute");
 const authRouter = require("./routes/authRoute");
 
 dbConnect();
-app.use(cors());
+const corsOptions = {
+  origin: [
+    "http://localhost:5000", // Allow from local machine
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Allowed methods
+  allowedHeaders: ["Content-Type", "Authorization"], // Adjust headers if needed
+  credentials: true, // If you're using cookies or authorization headers
+};
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(morgan("dev"));
 app.get("/", (req, res) => {
