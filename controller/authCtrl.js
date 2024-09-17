@@ -24,27 +24,38 @@ const otpSchema = Joi.object({
 
 // User signup controller
 const signup = asyncHandler(async (req, res) => {
+  console.log(req.body);
   try {
     const { error } = signupSchema.validate(req.body);
     if (error)
-      return res.status(400).json({ message: error.details[0].message });
+      return res
+        .status(400)
+        .json({ success: false, error: { message: error.details[0].message } });
 
     const { firstName, lastName, email, password, mobileNumber, role } =
       req.body;
 
     // Validate email
     if (!isValidEmail(email)) {
-      return res.status(400).json({ message: "Enter a valid email" });
+      return res
+        .status(400)
+        .json({ success: false, error: { message: "Enter a valid email" } });
     }
 
     // Validate mobile number
     if (mobileNumber && !isValidMobileNumber(mobileNumber)) {
-      return res.status(400).json({ message: "Enter a valid mobile number" });
+      return res.status(400).json({
+        success: false,
+        error: { message: "Enter a valid mobile number" },
+      });
     }
 
     let user = await User.findOne({ email });
 
-    if (user) return res.status(400).json({ message: "User already exists" });
+    if (user)
+      return res
+        .status(400)
+        .json({ success: false, error: { message: "User already exists" } });
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
@@ -68,7 +79,12 @@ const signup = asyncHandler(async (req, res) => {
 
     await sendEmail(email, "Verify your email", `Your OTP is: ${otp}`);
 
-    res.status(201).json({ message: "OTP sent to your email" });
+    res.status(201).json({
+      success: true,
+      data: {
+        message: "Otp sent to your email",
+      },
+    });
   } catch (error) {
     console.error(error); // Log error for internal review
     res.status(500).json({
@@ -85,17 +101,25 @@ const verifyOtp = asyncHandler(async (req, res) => {
   try {
     const { error } = otpSchema.validate(req.body);
     if (error)
-      return res.status(400).json({ message: error.details[0].message });
+      return res
+        .status(400)
+        .json({ success: false, error: { message: error.details[0].message } });
 
     const { email, otp } = req.body;
     const user = await User.findOne({ email });
 
-    if (!user) return res.status(400).json({ message: "Invalid user" });
+    if (!user)
+      return res
+        .status(400)
+        .json({ success: false, error: { message: "Invalid user" } });
 
     // Check OTP validity
     const otpValid = await bcrypt.compare(otp, user.otp);
     if (!otpValid || user.otpExpires < Date.now()) {
-      return res.status(400).json({ message: "OTP is invalid or expired" });
+      return res.status(400).json({
+        success: false,
+        error: { message: "OTP is invalid or expired" },
+      });
     }
 
     user.isVerified = true;
@@ -108,7 +132,10 @@ const verifyOtp = asyncHandler(async (req, res) => {
       expiresIn: "1h",
     });
 
-    res.status(200).json({ message: "User verified successfully", token });
+    res.status(200).json({
+      success: true,
+      data: { message: "User verified successfully", token },
+    });
   } catch (error) {
     console.error(error); // Log error for internal review
     res.status(500).json({
@@ -127,7 +154,10 @@ const resendOtp = asyncHandler(async (req, res) => {
 
     // Check if the user exists
     const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ message: "User does not exist" });
+    if (!user)
+      return res
+        .status(400)
+        .json({ success: false, error: { message: "User does not exist" } });
 
     // Generate a new OTP
     const otp = crypto.randomInt(100000, 999999).toString();
@@ -144,7 +174,9 @@ const resendOtp = asyncHandler(async (req, res) => {
     // Send the new OTP via email
     await sendEmail(email, "Resend OTP", `Your new OTP is: ${otp}`);
 
-    res.status(200).json({ message: "New OTP sent to your email" });
+    res
+      .status(200)
+      .json({ success: true, data: { message: "New OTP sent to your email" } });
   } catch (error) {
     console.error(error); // Log error for internal review
     res.status(500).json({

@@ -5,6 +5,8 @@ const PORT = process.env.PORT || 5000;
 const cors = require("cors");
 const { notFound, errorHandler } = require("./middlewares/errorHandler");
 const morgan = require("morgan");
+const multer = require("multer");
+const upload = multer();
 const blogRouter = require("./routes/blogRoute");
 const authRouter = require("./routes/authRoute");
 
@@ -17,12 +19,15 @@ const corsOptions = {
   allowedHeaders: ["Content-Type", "Authorization"], // Adjust headers if needed
   credentials: true, // If you're using cookies or authorization headers
 };
-app.use(cors(corsOptions));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+// app.use(upload.none()); // This should come before your routes
 app.use(morgan("dev"));
+app.use(cors(corsOptions));
+
 app.get("/", (req, res) => {
   res.json({
-    message: "Welcome to the API! vercel deploy test",
+    message: "Welcome to the API! ",
     status: "success",
     data: null,
   });
