@@ -98,6 +98,7 @@ const signup = asyncHandler(async (req, res) => {
 
 // OTP verification controller
 const verifyOtp = asyncHandler(async (req, res) => {
+  console.log(req.body);
   try {
     const { error } = otpSchema.validate(req.body);
     if (error)
@@ -187,5 +188,30 @@ const resendOtp = asyncHandler(async (req, res) => {
     });
   }
 });
+//login
+const login = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
+  const user = await User.findOne({ email });
+  if (!user) {
+    return res
+      .status(400)
+      .json({ success: false, error: { message: "Invalid user" } });
+  }
+  const passwordValid = await bcrypt.compare(password, user.password);
+  if (!passwordValid) {
+    return res
+      .status(400)
+      .json({ success: false, error: { message: "Invalid password" } });
+  }
+  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+    expiresIn: "1h",
+  });
+  res
+    .status(200)
+    .json({
+      success: true,
+      data: { message: "User logged in successfully", token },
+    });
+});
 
-module.exports = { signup, verifyOtp, resendOtp };
+module.exports = { signup, verifyOtp, resendOtp, login };
