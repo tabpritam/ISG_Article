@@ -5,7 +5,7 @@ const upload = require("../config/multerConfig");
 const { authMiddleware, isAdmin } = require("../middlewares/authMiddleware");
 
 router.post("/", upload.single("image"), authMiddleware, isAdmin, createBlog);
-router.get("/", getAllBlog);
-router.get("/:id", getBlog);
+router.get("/:page?", getAllBlog);
+router.get("/getaBlog/:id", getBlog);
 
 module.exports = router;

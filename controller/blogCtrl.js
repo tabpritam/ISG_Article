@@ -54,13 +54,39 @@ const createBlog = asyncHandler(async (req, res) => {
   }
 });
 
-//get all blog
+// get all blog
+// const getAllBlog = asyncHandler(async (req, res) => {
+//   try {
+//     const allBlogs = await Blog.find();
+//     res.json({ success: "true", data: { allBlogs } });
+//   } catch (error) {
+//     res.status(400).json({ success: "false", data: { errMessage: error } });
+//     throw new Error("Invalid data");
+//   }
+// });
 const getAllBlog = asyncHandler(async (req, res) => {
   try {
-    const allBlogs = await Blog.find();
-    res.json({ success: "true", data: { allBlogs } });
+    const page = parseInt(req.params.page) || 1;
+    const limit = 18;
+    const skip = (page - 1) * limit;
+
+    const totalBlogs = await Blog.countDocuments();
+    const allBlogs = await Blog.find().skip(skip).limit(limit);
+
+    const totalPages = Math.ceil(totalBlogs / limit);
+
+    res.json({
+      success: true,
+      data: {
+        allBlogs: allBlogs,
+      },
+      pageCount: totalPages,
+      currentPage: page,
+    });
   } catch (error) {
-    res.status(400).json({ success: "false", data: { errMessage: error } });
+    res
+      .status(400)
+      .json({ success: false, data: { errMessage: error.message } });
     throw new Error("Invalid data");
   }
 });
@@ -92,4 +118,15 @@ const updateBlog = asyncHandler(async (req, res) => {
   }
 });
 
-module.exports = { createBlog, getAllBlog, getBlog, updateBlog };
+//delete a blog
+const deleteBlog = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  validateMongodbId(id);
+  try {
+    await Blog.findByIdAndDelete(id);
+    res.json({ success: true, data: { message: "Blog deleted successfully" } });
+  } catch (error) {
+    throw new Error(error);
+  }
+});
+module.exports = { createBlog, getAllBlog, getBlog, updateBlog, deleteBlog };

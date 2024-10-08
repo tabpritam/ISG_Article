@@ -1,6 +1,6 @@
 // routes/authRoute.js
 const express = require("express");
-const { signup, verifyOtp, resendOtp,login } = require("../controller/authCtrl");
+const { signup, verifyOtp, resendOtp,login,validateLogin } = require("../controller/authCtrl");
 const rateLimit = require("express-rate-limit");
 const asyncHandler = require("express-async-handler");
 
@@ -23,4 +23,5 @@ router.post("/signup", signup);
 router.post("/verify-otp", verifyOtp);
 router.post("/resend-otp", resendOtp);
 router.post("/login", login);
+router.get("/validate", validateLogin);
 module.exports = router;

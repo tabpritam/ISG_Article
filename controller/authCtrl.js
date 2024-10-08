@@ -206,6 +206,13 @@ const login = asyncHandler(async (req, res) => {
   const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
     expiresIn: "1h",
   });
+  // Set the token in an HttpOnly cookie
+  // res.cookie("token", token, { 
+  //   httpOnly: true,
+  //   secure: true,
+  //   sameSite: "strict",
+  //   maxAge: 3600000, // 1 hour
+  // });
   res
     .status(200)
     .json({
@@ -214,4 +221,44 @@ const login = asyncHandler(async (req, res) => {
     });
 });
 
-module.exports = { signup, verifyOtp, resendOtp, login };
+//validate login
+const validateLogin = asyncHandler(async (req, res, next) => {
+  const token = req.headers.authorization && req.headers.authorization.split(" ")[1];
+
+  if (!token) {
+    return res.status(401).json({ success: false, error: { message: "No token provided, authorization denied" } });
+  }
+
+  try {
+    // Verify the token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // Find user and exclude the password field
+    const user = await User.findById(decoded.id).select("-password");
+
+    if (!user) {
+      return res.status(401).json({ success: false, error: { message: "User not found, authorization denied" } });
+    }
+
+    // Add the user object to the request
+    req.user = user;
+
+    // Return success with user's first name
+    return res.status(200).json({
+      success: true,
+      data: {
+        message: "User validated successfully",
+        firstName: user.firstName,  // Include first name in response
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(401).json({ success: false, error: { message: "Invalid or expired token, authorization denied" } });
+  }
+});
+
+
+
+     
+        
+module.exports = { signup, verifyOtp, resendOtp, login, validateLogin };
